@@ -11,7 +11,7 @@
             margin: 0;
             padding: 0;
             background-color: #000;
-            color: #ffaa00; /* LCARS orange/amber tone */
+            color: #ffaa00;
             font-family: monospace;
             overflow: hidden;
             touch-action: none;
@@ -50,7 +50,7 @@
         .lcars-elbow-right {
             width: 30px;
             height: 100%;
-            background: #cc66ff; /* LCARS purple accent */
+            background: #cc66ff;
             border-top-right-radius: 15px;
             border-bottom-right-radius: 15px;
             margin-left: 10px;
@@ -192,7 +192,7 @@
             border-top-right-radius: 40px;
             border-bottom-left-radius: 40px;
             border-bottom-right-radius: 15px;
-            display: none; /* Hidden until powered up */
+            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -225,55 +225,13 @@
             pointer-events: auto;
         }
 
-        /* Authentic Star Trek TNG Staggered Opening Title Styling */
-        .tng-title-container {
-            perspective: 500px;
-            margin: 5px 0 10px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .tng-main-row {
-            display: flex;
-            align-items: flex-start;
-            position: relative;
-            transform: rotateX(12deg) skewX(-10deg);
-        }
-        .tng-star {
-            font-family: "Impact", "Arial Black", sans-serif;
-            font-size: 46px;
-            font-weight: 900;
-            letter-spacing: 3px;
-            color: #00bfff;
-            text-transform: uppercase;
-            text-shadow: 2px 4px 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 191, 255, 0.8);
-            z-index: 2;
-        }
-        .tng-trek {
-            font-family: "Impact", "Arial Black", sans-serif;
-            font-size: 46px;
-            font-weight: 900;
-            letter-spacing: 3px;
-            color: #00bfff;
-            text-transform: uppercase;
-            text-shadow: 2px 4px 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 191, 255, 0.8);
-            margin-left: -22px; /* Overlaps seamlessly with STAR */
-            margin-top: 26px; /* Staggers TREK lower down as in reference */
-            z-index: 3;
-        }
-        .tng-subtitle {
-            font-family: "Impact", "Arial Black", sans-serif;
-            font-size: 15px;
-            font-weight: 700;
-            letter-spacing: 4px;
-            color: #00bfff;
-            text-transform: uppercase;
-            transform: rotateX(12deg) skewX(-10deg);
-            text-shadow: 1px 2px 6px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 191, 255, 0.6);
-            margin-top: 4px;
-            width: 100%;
-            text-align: center;
-            z-index: 1;
+        /* Main Menu Specific Background Image (Replaced with GIF) */
+        #splash {
+            background-color: #000000;
+            background-image: url('20261010_210916.gif');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
         }
 
         .splash p {
@@ -307,14 +265,6 @@
             background: #ff9900;
             transform: scale(0.95);
         }
-        #splashCanvas {
-            width: 180px;
-            height: 120px;
-            margin-bottom: 5px;
-            border: 2px solid rgba(255, 153, 0, 0.5);
-            border-radius: 12px;
-            background: rgba(0, 0, 0, 0.5);
-        }
         .hidden-splash {
             opacity: 0;
             visibility: hidden;
@@ -325,16 +275,7 @@
 <body>
 
     <!-- Main Splash Screen -->
-    <div id="splash" class="splash">
-        <div class="tng-title-container">
-            <div class="tng-main-row">
-                <div class="tng-star">STAR</div>
-                <div class="tng-trek">TREK</div>
-            </div>
-            <div class="tng-subtitle">THE NEXT GENERATION</div>
-        </div>
-        <canvas id="splashCanvas" width="180" height="120"></canvas>
-        <p>LCARS interface active. Use the virtual joystick to steer • Tap PHASER to fire • Collect Homing Photon Torpedoes!</p>
+    <div id="splash" class="splash" style="justify-content: flex-end; padding-bottom: 80px;">
         <div class="buttonGroup">
             <button id="newGameBtn" class="actionBtn" type="button">NEW GAME</button>
             <button id="resumeBtn" class="actionBtn" type="button">RESUME GAME</button>
@@ -410,185 +351,140 @@
             }
         }
 
-        // 1. Phaser Sound (Classic sharp energy zap)
         function playPhaserSound() {
             initAudio();
             if (!audioCtx) return;
-
             let osc = audioCtx.createOscillator();
             let gain = audioCtx.createGain();
-
             osc.type = 'sawtooth';
             osc.frequency.setValueAtTime(880, audioCtx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.15);
-
             gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-
             osc.start();
             osc.stop(audioCtx.currentTime + 0.15);
         }
 
-        // 2. Photon Torpedo Sound (Rocket launch rumbled roar with Doppler pitch drop)
         function playPhotonSound() {
             initAudio();
             if (!audioCtx) return;
-
             let now = audioCtx.currentTime;
-
-            // Rocket low rumble (Sawtooth + lowpass filter)
             let osc = audioCtx.createOscillator();
             let filter = audioCtx.createBiquadFilter();
             let gain = audioCtx.createGain();
-
             osc.type = 'sawtooth';
             osc.frequency.setValueAtTime(180, now);
             osc.frequency.exponentialRampToValueAtTime(50, now + 0.45);
-
             filter.type = 'lowpass';
             filter.frequency.setValueAtTime(600, now);
             filter.frequency.linearRampToValueAtTime(150, now + 0.45);
-
             gain.gain.setValueAtTime(0.3, now);
             gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
-
             osc.connect(filter);
             filter.connect(gain);
             gain.connect(audioCtx.destination);
-
             osc.start(now);
             osc.stop(now + 0.45);
 
-            // Rocket white noise exhaust hiss
             let bufferSize = audioCtx.sampleRate * 0.45;
             let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
             let output = buffer.getChannelData(0);
             for (let i = 0; i < bufferSize; i++) {
                 output[i] = Math.random() * 2 - 1;
             }
-
             let whiteNoise = audioCtx.createBufferSource();
             whiteNoise.buffer = buffer;
-
             let noiseFilter = audioCtx.createBiquadFilter();
             noiseFilter.type = 'bandpass';
             noiseFilter.frequency.setValueAtTime(800, now);
             noiseFilter.frequency.linearRampToValueAtTime(300, now + 0.45);
             noiseFilter.Q.setValueAtTime(2, now);
-
             let noiseGain = audioCtx.createGain();
             noiseGain.gain.setValueAtTime(0.2, now);
             noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
-
             whiteNoise.connect(noiseFilter);
             noiseFilter.connect(noiseGain);
             noiseGain.connect(audioCtx.destination);
-
             whiteNoise.start(now);
             whiteNoise.stop(now + 0.45);
         }
 
-        // 3. Photon Torpedo Impact / Explosion Sound
         function playPhotonImpactSound() {
             initAudio();
             if (!audioCtx) return;
-
             let now = audioCtx.currentTime;
-
-            // Explosion white noise burst
             let bufferSize = audioCtx.sampleRate * 0.35;
             let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
             let output = buffer.getChannelData(0);
             for (let i = 0; i < bufferSize; i++) {
                 output[i] = Math.random() * 2 - 1;
             }
-
             let whiteNoise = audioCtx.createBufferSource();
             whiteNoise.buffer = buffer;
-
             let filter = audioCtx.createBiquadFilter();
             filter.type = 'lowpass';
             filter.frequency.setValueAtTime(400, now);
             filter.frequency.linearRampToValueAtTime(60, now + 0.35);
-
             let gain = audioCtx.createGain();
             gain.gain.setValueAtTime(0.35, now);
             gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
-
             whiteNoise.connect(filter);
             filter.connect(gain);
             gain.connect(audioCtx.destination);
-
             whiteNoise.start(now);
             whiteNoise.stop(now + 0.35);
         }
 
-        // 4. Warp Speed Sound (Rushing white noise swell)
         function playWarpSound() {
             initAudio();
             if (!audioCtx) return;
-
-            let bufferSize = audioCtx.sampleRate * 2.5; // 2.5 seconds
+            let bufferSize = audioCtx.sampleRate * 2.5; 
             let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
             let output = buffer.getChannelData(0);
             for (let i = 0; i < bufferSize; i++) {
                 output[i] = Math.random() * 2 - 1;
             }
-
             let whiteNoise = audioCtx.createBufferSource();
             whiteNoise.buffer = buffer;
-
             let filter = audioCtx.createBiquadFilter();
             filter.type = 'bandpass';
             filter.frequency.setValueAtTime(200, audioCtx.currentTime);
             filter.frequency.linearRampToValueAtTime(2500, audioCtx.currentTime + 2.0);
             filter.Q.setValueAtTime(3, audioCtx.currentTime);
-
             let gain = audioCtx.createGain();
             gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
             gain.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + 1.2);
             gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 2.5);
-
             whiteNoise.connect(filter);
             filter.connect(gain);
             gain.connect(audioCtx.destination);
-
             whiteNoise.start();
             whiteNoise.stop(audioCtx.currentTime + 2.5);
         }
 
-        // 5. Red Alert Sound (Classic TNG dual-tone klaxon alarm loop)
         function playRedAlertBeep() {
             initAudio();
             if (!audioCtx) return;
-
             let now = audioCtx.currentTime;
-            
             let osc1 = audioCtx.createOscillator();
             let gain1 = audioCtx.createGain();
             osc1.type = 'square';
             osc1.frequency.setValueAtTime(880, now);
-            
             gain1.gain.setValueAtTime(0.15, now);
             gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
-
             osc1.connect(gain1);
             gain1.connect(audioCtx.destination);
             osc1.start(now);
             osc1.stop(now + 0.35);
-
             let osc2 = audioCtx.createOscillator();
             let gain2 = audioCtx.createGain();
             osc2.type = 'square';
             osc2.frequency.setValueAtTime(659.25, now + 0.35);
             osc2.frequency.linearRampToValueAtTime(440, now + 0.7);
-
             gain2.gain.setValueAtTime(0.15, now + 0.35);
             gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
-
             osc2.connect(gain2);
             gain2.connect(audioCtx.destination);
             osc2.start(now + 0.35);
@@ -608,60 +504,13 @@
             }
         }
 
-        // Splash Screen Enterprise Preview
-        const splashCanvas = document.getElementById("splashCanvas");
-        const sCtx = splashCanvas.getContext("2d");
-        
-        function drawSplashEnterprise(angle) {
-            sCtx.clearRect(0, 0, splashCanvas.width, splashCanvas.height);
-            sCtx.save();
-            sCtx.translate(90, 60);
-            sCtx.rotate(Math.sin(angle) * 0.15);
-
-            sCtx.fillStyle = "#00d5ff";
-            sCtx.shadowBlur = 10;
-            sCtx.shadowColor = "#00d5ff";
-            sCtx.fillRect(-35, 10, 10, 40);
-            sCtx.fillRect(25, 10, 10, 40);
-            sCtx.shadowBlur = 0;
-
-            sCtx.fillStyle = "#888888";
-            sCtx.fillRect(-32, -5, 4, 20);
-            sCtx.fillRect(28, -5, 4, 20);
-
-            sCtx.fillStyle = "#cccccc";
-            sCtx.fillRect(-8, -15, 16, 40);
-
-            sCtx.fillStyle = "#ffaa00";
-            sCtx.beginPath();
-            sCtx.arc(0, 22, 4, 0, Math.PI * 2);
-            sCtx.fill();
-
-            sCtx.fillStyle = "#eeeeee";
-            sCtx.beginPath();
-            sCtx.ellipse(0, -20, 50, 20, 0, 0, Math.PI * 2);
-            sCtx.fill();
-
-            sCtx.strokeStyle = "#00ffff";
-            sCtx.lineWidth = 1.5;
-            sCtx.beginPath();
-            sCtx.ellipse(0, -20, 44, 14, 0, 0, Math.PI * 2);
-            sCtx.stroke();
-
-            sCtx.restore();
-        }
-
-        let animAngle = 0;
-        function animateSplash() {
-            animAngle += 0.03;
-            drawSplashEnterprise(animAngle);
-            requestAnimationFrame(animateSplash);
-        }
-        animateSplash();
-
         // Game Setup & Declarations
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
+
+        // Player Ship Image Loading
+        const playerShipImg = new Image();
+        playerShipImg.src = 'enterprise.png';
 
         const shieldCanvasMini = document.getElementById("shieldCanvasMini");
         const smCtx = shieldCanvasMini.getContext("2d");
@@ -709,8 +558,8 @@
         let player = {
             x: 0,
             y: 0,
-            width: 60,
-            height: 70,
+            width: 80,
+            height: 120,
             speed: 6.5
         };
 
@@ -1626,35 +1475,19 @@
                 let px = player.x;
                 let py = player.y;
 
-                ctx.fillStyle = "#00d5ff";
-                ctx.shadowBlur = isWarping ? 25 : 12;
-                ctx.shadowColor = "#00d5ff";
-                ctx.fillRect(px + 2, py + 35, 6, isWarping ? 60 : 30);
-                ctx.fillRect(px + player.width - 8, py + 35, 6, isWarping ? 60 : 30);
+                if (isWarping) {
+                    ctx.shadowBlur = 25;
+                    ctx.shadowColor = "#00d5ff";
+                }
+
+                if (playerShipImg.complete && playerShipImg.naturalWidth > 0) {
+                    ctx.drawImage(playerShipImg, px, py, player.width, player.height);
+                } else {
+                    ctx.fillStyle = "rgba(0, 213, 255, 0.5)";
+                    ctx.fillRect(px + 25, py + 10, 10, 50);
+                }
+                
                 ctx.shadowBlur = 0;
-
-                ctx.fillStyle = "#888888";
-                ctx.fillRect(px + 4, py + 25, 3, 12);
-                ctx.fillRect(px + player.width - 7, py + 25, 3, 12);
-
-                ctx.fillStyle = "#cccccc";
-                ctx.fillRect(px + player.width / 2 - 6, py + 20, 12, 35);
-
-                ctx.fillStyle = "#ffaa00";
-                ctx.beginPath();
-                ctx.arc(px + player.width / 2, py + 50, 4, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.fillStyle = "#dddddd";
-                ctx.beginPath();
-                ctx.ellipse(px + player.width / 2, py + 18, player.width / 2, 14, 0, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.strokeStyle = "#99ccff";
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.ellipse(px + player.width / 2, py + 18, player.width / 2 - 4, 10, 0, 0, Math.PI * 2);
-                ctx.stroke();
 
                 ctx.fillStyle = "#ff0055";
                 ctx.shadowBlur = 10;
@@ -1783,7 +1616,7 @@
                         ctx.ellipse(0, -e.height * 0.15, e.width * 0.25, e.height * 0.35, 0, 0, Math.PI * 2);
                         ctx.fill();
 
-                        ctx.fillStyle = "1e332a";
+                        ctx.fillStyle = "#1e332a";
                         ctx.beginPath();
                         ctx.moveTo(0, -e.height * 0.5);
                         ctx.lineTo(e.width * 0.12, -e.height * 0.2);
